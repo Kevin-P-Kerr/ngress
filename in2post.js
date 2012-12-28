@@ -157,8 +157,8 @@ var pre2post = function (input) {
 	return parse_regex(input).parsed;
 };
 
-console.log(pre2post("a(bb)+a") ==="abb.+.a.");
-console.log(pre2post("a|(bb)+")  === "abb.+|");
+console.log(pre2post("a(bb)+a") === "abb.+.a.");
+console.log(pre2post("a|(bb)+") === "abb.+|");
 console.log(pre2post("a\\?") === "a\\?.");
 console.log(pre2post("a(bb(dd)+)+gf+") === "abb.dd.+.+.g.f+.");
 console.log(pre2post("a?|ab*") === "a?ab*.|");
