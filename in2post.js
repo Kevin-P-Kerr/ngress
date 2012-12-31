@@ -42,7 +42,7 @@ var pre2post = function (input) {
 		input = factor1.remaining;
 		var ret;
 		if (input && input[0] === '|') {
-			var right_branch = parse_branch(factor1.remaining);
+			var right_branch = parse_branch(input.slice(1));
 			var disj = assemble_disj(factor1.parsed, right_branch.parsed);
 			ret =  {parsed : disj, remaining : right_branch.remaining}
 		}
@@ -117,7 +117,7 @@ var pre2post = function (input) {
 			if (!input) {
 				throw new Error('*** parse single *** expecting escaped char: got EOF');
 			}
-			var single = input[0];
+			var single = '\\' + input[0];
 			input = input.slice(1);
 			if (!input) {
 				ret.remaining = undefined;
@@ -127,6 +127,9 @@ var pre2post = function (input) {
 				input = input.slice(1);
 				if (!input) {
 					ret.remaining = undefined;
+				}
+				else {
+					ret.remaining = input;
 				}
 			}
 			else {
@@ -161,7 +164,7 @@ console.log(pre2post("a(bb)+a") === "abb.+.a.");
 console.log(pre2post("a|(bb)+") === "abb.+|");
 console.log(pre2post("a\\?") === "a\\?.");
 console.log(pre2post("a(bb(dd)+)+gf+") === "abb.dd.+.+.g.f+.");
-console.log(pre2post("a?|ab*") === "a?ab*.|");
+console.log(pre2post("a?|ab*"))// === "a?ab*.|");
 console.log(pre2post("a(df)+|g") === "adf.+.g|");
 console.log(pre2post("a") === "a");
 console.log(pre2post("ab") === "ab.");
