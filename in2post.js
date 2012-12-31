@@ -1,6 +1,6 @@
 var pre2post = function (input) {
-     // regex := <branch>{<branch}>...
-     // branch := <factor> {'|' <branch> }
+     // regex := <branch>{<branch>}...
+     // branch := <factor> {'|' <regex> }
      // factor := <single> | ( <regex> ) {repitition}
      // single := <identifier>{<repition>}
      // identifer := <valid_identifer> | <escaped char>
@@ -18,6 +18,7 @@ var pre2post = function (input) {
 			if (input[0] === ')') { // end of input
 				input = input.slice(1);
 				branch.remaining = input;
+				branch.parsed = undefined; // it's already been pushed /HACK
 				break;
 			}
 		}
@@ -42,9 +43,9 @@ var pre2post = function (input) {
 		input = factor1.remaining;
 		var ret;
 		if (input && input[0] === '|') {
-			var right_branch = parse_branch(input.slice(1));
-			var disj = assemble_disj(factor1.parsed, right_branch.parsed);
-			ret =  {parsed : disj, remaining : right_branch.remaining}
+			var right_regex = parse_regex(input.slice(1));
+			var disj = assemble_disj(factor1.parsed, right_regex.parsed);
+			ret =  {parsed : disj, remaining : right_regex.remaining}
 		}
 		else {
 			ret = factor1;
@@ -106,6 +107,9 @@ var pre2post = function (input) {
 				if (!input) {
 					ret.remaining = undefined;
 				}
+				else {
+					ret.remaining = input;
+				}
 			}
 			else {
 				ret.remaining = input;
@@ -164,12 +168,13 @@ console.log(pre2post("a(bb)+a") === "abb.+.a.");
 console.log(pre2post("a|(bb)+") === "abb.+|");
 console.log(pre2post("a\\?") === "a\\?.");
 console.log(pre2post("a(bb(dd)+)+gf+") === "abb.dd.+.+.g.f+.");
-console.log(pre2post("a?|ab*"))// === "a?ab*.|");
+console.log(pre2post("a?|ab*") === "a?ab*.|");
+console.log(pre2post("a?|(ab*)") === "a?ab*.|");
 console.log(pre2post("a(df)+|g") === "adf.+.g|");
-console.log(pre2post("a") === "a");
+console.log(pre2post("a") ===  "a");
 console.log(pre2post("ab") === "ab.");
 console.log(pre2post("a|b") === "ab|");
-console.log(pre2post("abba") === "ab.b.a.");
+console.log(pre2post("abba") === "abba...");
 console.log(pre2post("ab?|bb+")  === "ab?.bb+.|");
 
 exports.in2post = pre2post;
